@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FOODWALLET - Customer Login</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="app-viewport" style="justify-content: center; padding-bottom: 0;">
+    
+    <!-- Top Header Bar -->
+    <header class="top-header" style="position: absolute; top: 0; width: 100%;">
+      <div class="brand-title">
+        <span data-i18n="app_name">FOODWALLET</span>
+        <span class="brand-badge">PREPAID</span>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <div class="lang-toggle-bar">
+          <button class="lang-btn active" data-lang="en" onclick="i18n.setLanguage('en')">EN</button>
+          <button class="lang-btn" data-lang="ta" onclick="i18n.setLanguage('ta')">தமிழ்</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- SEPARATE CUSTOMER AUTHENTICATION CARD -->
+    <div class="card" style="margin-top: 60px; width: 100%;">
+      
+      <!-- Tab Color Shifting Selector -->
+      <div style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+        <button id="tab-btn-login" class="btn-primary" style="flex: 1; padding: 10px; font-size: 0.88rem;" onclick="showAuthTab('login')" data-i18n="login">Sign In</button>
+        <button id="tab-btn-register" class="btn-secondary" style="flex: 1; padding: 10px; font-size: 0.88rem;" onclick="showAuthTab('register')" data-i18n="register">Create Account</button>
+      </div>
+
+      <!-- Customer Login Form -->
+      <form id="login-form" onsubmit="handleCustomerLogin(event)">
+        <div class="form-group">
+          <label class="form-label" data-i18n="phone_number">Phone Number</label>
+          <input type="text" id="login-contact" class="form-input" data-i18n-placeholder="enter_phone" placeholder="Enter your phone number" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="password">Password</label>
+          <input type="password" id="login-password" class="form-input" data-i18n-placeholder="enter_password" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" id="btn-submit-login" class="btn-primary" data-i18n="login">Sign In</button>
+      </form>
+
+      <!-- Customer Register Form -->
+      <form id="register-form" style="display: none;" onsubmit="handleCustomerRegister(event)">
+        <div class="form-group">
+          <label class="form-label" data-i18n="full_name">Full Name</label>
+          <input type="text" id="reg-name" class="form-input" data-i18n-placeholder="enter_name" placeholder="Enter your full name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="phone_number">Phone Number</label>
+          <input type="text" id="reg-phone" class="form-input" data-i18n-placeholder="enter_phone" placeholder="Enter your phone number" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="email_address">Email Address (Optional)</label>
+          <input type="email" id="reg-email" class="form-input" data-i18n-placeholder="enter_email" placeholder="gayathri.p_25it@kgkite.ac.in">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="password">Password</label>
+          <input type="password" id="reg-password" class="form-input" data-i18n-placeholder="enter_password" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" id="btn-submit-register" class="btn-primary" data-i18n="register">Create Account</button>
+      </form>
+
+    </div>
+
+  </div>
+
+  <script src="/static/js/i18n.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

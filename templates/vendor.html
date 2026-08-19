@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FOODWALLET - Vendor Control Center</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="vendor-layout-container">
+    
+    <!-- Toast Notifications Container -->
+    <div id="vtoast-container" class="toast-container"></div>
+
+    <!-- STATE 1: VENDOR NOT LOGGED IN (Vendor Sign In Page ONLY - Visible by default in raw HTML) -->
+    <div id="vendor-auth-view" class="card" style="margin-top: 40px; max-width: 400px; margin-left: auto; margin-right: auto;">
+      <div style="font-size: 1.25rem; font-weight: 800; margin-bottom: 6px; text-align: center;" data-i18n="vendor_login">Vendor Sign In</div>
+      <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-bottom: 20px;">Secret Canteen Management Portal</div>
+      
+      <form onsubmit="handleVendorLogin(event)">
+        <div class="form-group">
+          <label class="form-label" data-i18n="vendor_username">Username / Phone Number</label>
+          <input type="text" id="vendor-user-input" class="form-input" placeholder="admin or 9999999999" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="vendor_password">Password</label>
+          <input type="password" id="vendor-pass-input" class="form-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" id="btn-vendor-login" class="btn-primary" data-i18n="vendor_login">Vendor Sign In</button>
+      </form>
+    </div>
+
+    <!-- STATE 2: VENDOR LOGGED IN (Vendor Control Center Dashboard ONLY - Hidden by default in raw HTML) -->
+    <div id="vendor-dashboard-view" class="vendor-dashboard-wrapper hidden" style="display: none !important;">
+      
+      <!-- TOP-LEFT SIDEBAR NAVIGATION MENU -->
+      <aside class="vendor-sidebar">
+        <div class="vendor-sidebar-brand">
+          <span data-i18n="app_name">FOODWALLET</span>
+          <div class="brand-badge" style="margin-top: 4px; display: inline-block;">VENDOR CONTROL</div>
+        </div>
+
+        <div class="lang-toggle-bar" style="margin: 14px 0 20px 0;">
+          <button class="lang-btn active" data-lang="en" onclick="i18n.setLanguage('en')">EN</button>
+          <button class="lang-btn" data-lang="ta" onclick="i18n.setLanguage('ta')">தமிழ்</button>
+        </div>
+
+        <nav class="vendor-sidebar-nav">
+          <button class="sidebar-nav-btn active" id="vtab-btn-requests" onclick="switchVendorTab('requests')">
+            <span>💳</span> <span data-i18n="vtab_requests">Prepaid Requests</span>
+          </button>
+          <button class="sidebar-nav-btn" id="vtab-btn-menu" onclick="switchVendorTab('menu')">
+            <span>🍱</span> <span data-i18n="vtab_menu">Food Menu</span>
+          </button>
+          <button class="sidebar-nav-btn" id="vtab-btn-customers" onclick="switchVendorTab('customers')">
+            <span>👥</span> <span data-i18n="vtab_customers">Customers Directory</span>
+          </button>
+          <button class="sidebar-nav-btn" id="vtab-btn-audit" onclick="switchVendorTab('audit')">
+            <span>📜</span> <span data-i18n="vtab_audit">System Audit Logs</span>
+          </button>
+          <button class="sidebar-nav-btn" id="vtab-btn-settings" onclick="switchVendorTab('settings')">
+            <span>⚙️</span> <span data-i18n="vtab_settings">Settings</span>
+          </button>
+          <button class="sidebar-nav-btn logout-btn" onclick="handleVendorLogout()" style="margin-top: 24px; color: #be123c;">
+            <span>🚪</span> <span data-i18n="logout">Log Out</span>
+          </button>
+        </nav>
+      </aside>
+
+      <!-- MAIN VENDOR CONTENT AREA -->
+      <main class="vendor-main-content">
+        
+        <!-- Metrics Overview Cards -->
+        <div class="vendor-grid">
+          <div class="card" style="margin-bottom: 0;">
+            <div class="action-icon-square blue">👥</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);" data-i18n="stat_total_customers">Total Customers</div>
+            <div style="font-size: 1.5rem; font-weight: 800;" id="vstat-customers">0</div>
+          </div>
+          <div class="card" style="margin-bottom: 0;">
+            <div class="action-icon-square amber">⏳</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);" data-i18n="stat_pending_requests">Pending Requests</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: #d97706;" id="vstat-pending">0</div>
+          </div>
+          <div class="card" style="margin-bottom: 0;">
+            <div class="action-icon-square green">💰</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);" data-i18n="stat_today_sales">Today's Sales</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: #059669;">₹<span id="vstat-today-sales">0.00</span></div>
+          </div>
+          <div class="card" style="margin-bottom: 0;">
+            <div class="action-icon-square purple">🍱</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);" data-i18n="stat_active_items">Active Food Items</div>
+            <div style="font-size: 1.5rem; font-weight: 800;" id="vstat-items">0</div>
+          </div>
+        </div>
+
+        <!-- Vendor Tab Panels -->
+        <div id="vpanel-requests" class="card">
+          <div style="font-size: 1.05rem; font-weight: 800; margin-bottom: 12px;" data-i18n="vtab_requests">Prepaid Requests</div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Req ID</th>
+                  <th data-i18n="customer_name">Customer</th>
+                  <th>Amount (₹)</th>
+                  <th data-i18n="date_time">Real Timestamp</th>
+                  <th>Status</th>
+                  
+                </tr>
+              </thead>
+              <tbody id="vtable-requests-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="vpanel-menu" class="card" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="font-size: 1.05rem; font-weight: 800;" data-i18n="vtab_menu">Food Menu</div>
+            <button class="btn-primary" style="width: auto; padding: 8px 16px; font-size: 0.82rem;" onclick="openAddMenuModal()" data-i18n="btn_add_item">+ Add Food Item</button>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Item ID</th>
+                  <th>Item Name</th>
+                  <th>Price (₹)</th>
+                  <th>Status</th>
+                  <th>Active Toggle & Actions</th>
+                </tr>
+              </thead>
+              <tbody id="vtable-menu-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="vpanel-customers" class="card" style="display: none;">
+          <div style="font-size: 1.05rem; font-weight: 800; margin-bottom: 12px;" data-i18n="vtab_customers">Customers Directory</div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th data-i18n="customer_name">Customer</th>
+                  <th data-i18n="phone_number">Phone Number</th>
+                  <th>Wallet Balance</th>
+                  <th>Total Orders</th>
+                  <th data-i18n="member_since">Member Since</th>
+                  <th>Active Food Items</th>
+                </tr>
+              </thead>
+              <tbody id="vtable-customers-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="vpanel-audit" class="card" style="display: none;">
+          <div style="font-size: 1.05rem; font-weight: 800; margin-bottom: 12px;" data-i18n="vtab_audit">System Audit Logs</div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th data-i18n="date_time">Real Timestamp</th>
+                  <th>Actor</th>
+                  <th>Action</th>
+                  <th>Entity</th>
+                  <th>Audit Details</th>
+                </tr>
+              </thead>
+              <tbody id="vtable-audit-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="vpanel-settings" class="card" style="display: none;">
+          <div style="font-size: 1.05rem; font-weight: 800; margin-bottom: 12px;" data-i18n="vtab_settings">Vendor Settings</div>
+          <form onsubmit="handleSaveSettings(event)">
+            <div class="form-group">
+              <label class="form-label">Low Balance Alert Threshold (₹)</label>
+              <input type="number" id="vinput-threshold" class="form-input" style="max-width: 280px;" value="50" required>
+            </div>
+            <button type="submit" class="btn-primary" style="max-width: 200px;">Save Settings</button>
+          </form>
+        </div>
+
+      </main>
+    </div>
+
+    <!-- Menu Item Modal -->
+    <div id="menu-modal" class="modal-overlay">
+      <div class="card" style="max-width: 400px; width: 100%;">
+        <div style="font-size: 1.1rem; font-weight: 800; margin-bottom: 14px;" id="menu-modal-title">Add Food Item</div>
+        <form onsubmit="handleSaveMenuItem(event)">
+          <input type="hidden" id="modal-menu-id">
+          <div class="form-group">
+            <label class="form-label">Item Name</label>
+            <input type="text" id="modal-menu-name" class="form-input" placeholder="e.g. Masala Dosa" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Price (₹)</label>
+            <input type="number" step="0.5" id="modal-menu-price" class="form-input" placeholder="e.g. 40.00" required>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 16px;">
+            <button type="button" class="btn-secondary" style="flex: 1;" onclick="closeMenuModal()">Cancel</button>
+            <button type="submit" class="btn-primary" style="flex: 1;" id="btn-save-menu-item">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/static/js/i18n.js"></script>
+  <script src="/static/js/vendor.js"></script>
+</body>
+</html>
