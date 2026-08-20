@@ -279,3 +279,22 @@ class IdempotencyRecord(db.Model):
             'status_code': self.status_code,
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
+
+
+        class PasswordResetOTP(db.Model):
+            __tablename__ = 'password_reset_otps'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id', ondelete='CASCADE'),
+        nullable=False,
+        index=True
+    )
+    otp_hash = db.Column(db.String(255), nullable=False)
+    expires_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    attempts = db.Column(db.Integer, nullable=False, default=0)
+    used = db.Column(db.Boolean, nullable=False, default=False)
+    created_at = db.Column(db.DateTime(timezone=True), default=get_ist_now)
+
+    user = db.relationship('User', foreign_keys=[user_id])

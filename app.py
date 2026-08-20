@@ -1,4 +1,6 @@
 import os
+from supabase import create_client, Client
+from dotenv import load_dotenv
 from decimal import Decimal
 from datetime import datetime, timezone
 from flask import Flask, render_template, request, jsonify, g
@@ -9,6 +11,14 @@ from services.wallet_service import create_topup_request, approve_topup_request,
 from services.billing_service import create_food_transaction, process_food_refund
 from services.audit_service import log_audit_event
 
+load_dotenv()
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+
 def create_app():
     app = Flask(__name__, template_folder='templates', static_folder='static')
     app.config.from_object(Config)
@@ -18,6 +28,23 @@ def create_app():
     with app.app_context():
         db.create_all()
         seed_initial_data(app)
+
+
+    @app.route('/test-supabase')
+    def test_supabase():
+        try:
+            result = supabase.table("food_items").select("*").limit(1).execute()
+            return jsonify({
+                "success": True,
+                "message": "Supabase connected successfully",
+                "data": result.data
+            })
+        except Exception as e:
+            return jsonify({
+                "success": False,
+                "error": str(e)
+            }), 500
+    return app
 
     # ----------------------------------------------------
     # Global User-Friendly Error Handlers (No raw stack traces exposed to users)
